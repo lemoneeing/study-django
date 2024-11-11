@@ -1,10 +1,17 @@
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.generic import ListView
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import Topping, Pizza, Chef
 from django.db import connection
 
 
 # Create your views here.
+
+# CBV + prefetch_related
+@method_decorator(csrf_exempt, name='dispatch')
 class HomeView(View):
 
     def get(self, request):
@@ -40,3 +47,28 @@ class HomeView(View):
         menu_list += "</ul></p>"
         response.write(menu_list)
         return response
+
+
+class IndexView(ListView):
+    model = Chef
+    template_name = 'restaurant/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'chefs': Chef.objects.all(),
+                        'menu': ['pizza'], })
+        return context
+
+
+# GCBV
+class MenuView(ListView):
+    template_name = 'restaurant/menu_cook.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cook'] = self.model.__name__
+        return context
+
+
+class PizzaMenu(MenuView):
+    model = Pizza

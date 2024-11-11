@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu({{ cook }})</title>
+</head>
+<body>
+    <p>
+        <b>Menu({{ cook }})</b>
+        <ul>
+        {% for cook in object_list %}
+            <li>{{ cook }}</li>
+        {% endfor %}
+        </ul>
+    </p>
+
+</body>
+</html>
