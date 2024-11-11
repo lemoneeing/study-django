@@ -14,7 +14,7 @@ class Chef(models.Model):
     career = models.IntegerField()
 
     def __str__(self):
-        return f"{self.name}({self.rank})"
+        return f"{self.name}({self.rank}) - {self.career} years of career"
 
 
 class Pizza(models.Model):
