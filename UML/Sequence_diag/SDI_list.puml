@@ -1,0 +1,29 @@
+@startuml
+Client -> SDI_list_view: get_sdi_list(request)
+
+SDI_list_view-> SDI_service: validate_user(user_info)
+SDI_service -> SDI_list_view: return result : Boolean
+
+alt Not valid user
+  SDI_list_view-> Client : return Response(code=99)
+end
+
+SDI_list_view-> SDI_service: get_sdi_by_userid(userId)
+
+alt if sdi_type == 'PTUT'
+    SDI_service -> ES: search(...)
+    ES -> SDI_service: return data
+end
+
+SDI_service -> SDI_service: paginate_sdi_list(count)
+
+  alt Success get sdi list
+    SDI_service -> SDI_list_view: return data: Dict
+    SDI_list_view-> Client : return Response(code=1, data, msg)
+
+  else Some exceptions raised
+    SDI_service -> SDI_list_view: return e: Exception
+    SDI_list_view-> Client : return Response(code=-1)
+
+  end
+@enduml
