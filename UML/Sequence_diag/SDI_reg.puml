@@ -1,0 +1,38 @@
+@startuml
+Client -> SDI_reg_view: register_sdi(request)
+
+SDI_reg_view-> SDI_service: check_user_valid(user_info)
+SDI_service -> SDI_reg_view: return result : Boolean
+
+alt Not valid user
+  SDI_reg_view-> Client : return Response(code=99)
+end
+
+SDI_reg_view-> SDI_service: check_sdi_name_valid(sdi_name)
+SDI_service -> SDI_reg_view: return result : Boolean
+
+alt Not valid name
+  SDI_reg_view-> Client : return Response(code=99)
+end
+
+SDI_reg_view-> SDI_service: check_my_sdi_count(user_info)
+SDI_service -> SDI_reg_view: return result : Boolean
+
+
+alt Exceeds count limit
+  SDI_reg_view-> Client : return Response(code=99)
+end
+
+
+SDI_reg_view-> SDI_service: insert_sdi(sdi_name, sdi_type, contents, ...)
+
+  alt Success registration sdi
+    SDI_service -> SDI_reg_view: return data: Dict
+    SDI_reg_view-> Client : return Response(code=1, data, msg)
+
+  else Some exceptions raised
+    SDI_service -> SDI_reg_view: return e: Exception
+    SDI_reg_view-> Client : return Response(code=-1)
+
+  end
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+Client -> SDI_detail_view: get_sdi_list(request)
+
+SDI_detail_view-> SDI_service: validate_user(user_info)
+SDI_service -> SDI_detail_view: return result : Boolean
+
+alt Not valid user
+  SDI_detail_view-> Client : return Response(code=99)
+end
+
+SDI_detail_view-> SDI_service: get_sdi_info_by_id(sdiId)
+
+  alt Success get sdi info
+    SDI_service -> SDI_detail_view: return data: Dict
+    SDI_detail_view-> Client : return Response(code=1, data, msg)
+
+  else Some exceptions raised
+    SDI_service -> SDI_detail_view: return e: Exception
+    SDI_detail_view-> Client : return Response(code=-1)
+
+  end
+@enduml
