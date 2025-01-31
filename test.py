@@ -1,28 +1,46 @@
 import sys
-input = sys.stdin.readline
+from idlelib.tree import TreeNode
+from typing import Optional, List
 
-def solution():
-    n = int(input())
-    ball_str = input().strip()
-
-    r_cnt = ball_str.count('R')
-
-
-
-    r_right = r_cnt
-    r_left_move = r_cnt
-
-
-    b_cnt = ball_str.count('B')
-    b_right_move = b_cnt
-    b_left_move = b_cnt
-
-    # 양 끝에서 연속된 색상 별 공 카운팅: r_left, r_right, b_left, b_right
-    # 각 색상 별 공 카운팅
-    # 색 x 방향 별 이동 횟수 계산:
-    # r_to_l = r_cnt - r_left
+# input = sys.stdin.readline
+#
+# def solution():
+#     n = int(input())
+#     balls_str = input().strip()
+#
+#     r_to_right = balls_str.rstrip('R').count('R')
+#     r_to_left = balls_str.lstrip('R').count('R')
+#
+#     b_to_right = balls_str.rstrip('B').count('B')
+#     b_to_left = balls_str.lstrip('B').count('B')
+#
+#     sys.stdout.write(f"{min(r_to_right, r_to_left, b_to_right, b_to_left)}")
+#
+#
+# solution()
 
 
-    sys.stdout.write(f"{min(r_move, b_move)}")
+# Leetcode 102. Binary Tree Level Order Traversal
+class Solution:
+    def levelOrder(self, root) -> List[List[int]]:
 
-solution()
+        tree = []
+        cnt = 0
+        k = 1
+        for i in range(len(root)):
+            if i == 0:
+                tree.append([root[i]])
+            else:
+                if cnt == 0:
+                    tree.append([])
+                if type(root[i]) is int:
+                    tree[-1].append(root[i])
+
+                cnt += 1
+            if cnt == 2**k:
+                k += 1
+                cnt = 0
+
+        return tree
+
+print(Solution().levelOrder([3,9,20,'null','null',15,7]))

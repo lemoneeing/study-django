@@ -5,12 +5,19 @@
 {% block content %}
     <h1>{{ post.title }}</h1>
     <p class="date">
-    {{ post.publish }} by {{ post.author }}
+    Published {{ post.publish }} by {{ post.author }}
     </p>
     {{ post.body|linebreaks }}
     <p>
         <a href="{% url 'blog:post_share' post.id %}">Share this post</a>
     </p>
+    <h2>Similar posts</h2>
+    {% for similar in similar_posts %}
+        <p>
+            <a href="{{ similar.get_absolute_url }}">{{ similar.title }}</a>
+        </p>
+    {% empty %} There is similar post yet.
+    {% endfor %}
     {% with comments.count as total_comments %}
         <h2>{{ total_comments }} comment{{total_comments|pluralize}}</h2>
     {% endwith %}
