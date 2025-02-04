@@ -132,3 +132,7 @@ EMAIL_HOST_USER = "b91352@gmail.com"
 EMAIL_HOST_PASSWORD = 'mtve fxkf sckc hyzf'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
