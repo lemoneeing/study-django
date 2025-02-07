@@ -3,13 +3,17 @@ from django.contrib.auth.models import User
 from .models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
 
-class SnippetSerializer(serializers.ModelSerializer):
+# class SnippetSerializer(serializers.ModelSerializer):
+class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     """Snippet Serializer """
     owner = serializers.ReadOnlyField(source='owner.username')
     # ReadOnlyField 를 사용하면 직렬화됮 표현에서는 owner 가 사용되지만 역직력화 형태(ex. Snippet 객체의 update) 에서는 사용되지 않음.
+
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
+
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'code', 'linenos', 'language', 'style', 'owner']
+        fields = ['id', 'title', 'highlight', 'owner', 'code', 'linenos', 'language', 'style']
     def create(self, validated_data):
         return Snippet.objects.create(**validated_data)
     
@@ -26,8 +30,10 @@ class SnippetSerializer(serializers.ModelSerializer):
         return instance
 
 
-class UserSerializer(serializers.ModelSerializer):
-    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all()) 
+# class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    # snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+    snippets = serializers.HyperlinkedRelatedField(many=True, view_name='snippet-detail', read_only=True)
     # 역참조 관계인 Snippet 을 User의 직렬화 필드에 포함 하기 위해 명시적으로 선언(안하면 User 직렬화에서 snippet 은 빠지게 됨.)
     # PrimaryKeyRelatedField 를 사용하면 직력화 후 snippets 을 Snippet 객체의 pk 로 표현한다.
 
