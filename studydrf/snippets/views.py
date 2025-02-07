@@ -7,10 +7,12 @@
 # from rest_framework.parsers import JSONParser
 # from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
-from rest_framework import status, mixins, generics
+from rest_framework import status, mixins, generics, permissions
 
 from .models import Snippet
 from .serializers import SnippetSerializer, UserSerializer
+from .permissions import IsOwnerOrReadOnly
+
 
 # Create your views here.
 # @api_view 데코레이터를 사용한 함수형 뷰 FBV
@@ -65,8 +67,11 @@ class SnippetList(generics.ListCreateAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
 
 # @api_view 데코레이터를 사용한 함수형 뷰 FBV
 # @api_view(['GET', 'PUT', 'DELETE'])
@@ -145,10 +150,13 @@ class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
-    serializer_class =UserSerializer
+    serializer_class = UserSerializer
+
 
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
