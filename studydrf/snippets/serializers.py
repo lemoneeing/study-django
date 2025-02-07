@@ -13,7 +13,7 @@ class SnippetSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'highlight', 'owner', 'code', 'linenos', 'language', 'style']
+        fields = ['url', 'id', 'title', 'highlight', 'owner', 'code', 'linenos', 'language', 'style']
     def create(self, validated_data):
         return Snippet.objects.create(**validated_data)
     
@@ -39,4 +39,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'snippets']
+        fields = ['url', 'id', 'username', 'snippets']
