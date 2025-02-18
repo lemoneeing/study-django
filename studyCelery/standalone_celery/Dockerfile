@@ -7,15 +7,7 @@ ENV PYTHONUNBUFFERED 1
 ARG DEV=false
 
 COPY requirements.txt /app/
-COPY requirements.dev.txt /app/
-COPY app /app/
+COPY . /app/
 
 WORKDIR /app
 RUN python -m pip install -r requirements.txt
-
-# install this only if it is dev mode
-RUN if [ $DEV = true ]; then python -m pip install -r requirements.dev.txt; fi
-
-EXPOSE 8000
-
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app.wsgi"]
