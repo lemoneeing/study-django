@@ -16,8 +16,18 @@ app = Celery('worker')
 app.config_from_object(f'django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
-app.autodiscover_tasks()
-
+# app.autodiscover_tasks()
+# 위 코드는 아래 설정을 자동으로 감지하여 설정하는 동작을 수행한다.
+app.conf.update(
+    task_routes = {
+        'worker.tasks.dumb': {
+            'queue': 'queue1'
+        },
+        'worker.tasks.add': {
+            'queue': 'queue2'
+        }
+    }
+)
 
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
