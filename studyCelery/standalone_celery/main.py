@@ -10,5 +10,11 @@ app = Celery('worker',
 
 app.config_from_object('celeryconfig')
 
+app.conf.task_route = {
+    'worker.tasks.*': {
+        'queue': 'queue2',
+    }
+}
+
 if __name__ == '__main__':
     app.start()
