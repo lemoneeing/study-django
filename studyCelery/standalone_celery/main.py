@@ -4,7 +4,7 @@ from celery import Celery
 #              broker='redis://redis:6379/0',
 #              backend='redis://redis:6379/0',
 #              include=['worker.tasks'])
-
+# OR
 app = Celery('worker',
              include=['worker.tasks'])
 
