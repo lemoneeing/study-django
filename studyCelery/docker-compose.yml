@@ -23,7 +23,7 @@ services:
       context: .
     volumes:
       - ./app:/app
-    command: celery --app=worker worker -l INFO -Q celery, celery:1,celery:2
+    command: celery --app=worker worker -l INFO -Q celery,celery:1,celery:2
     depends_on:
       - redis
 

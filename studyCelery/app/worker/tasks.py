@@ -2,14 +2,19 @@ import time
 from celery import shared_task
 
 
-@shared_task
-def add(x, y):
-    return x + y
+@shared_task(queue='celery', rate_limit='9/m')
+def add(x, y, msg=''):
+    return f"{msg}{x+y}"
 
 
-@shared_task
+@shared_task(queue='celery')
 def dumb():
     return
+
+
+@shared_task(queue='celery')
+def xsum(numbers):
+    return sum(numbers)
 
 
 @shared_task(queue='celery')
