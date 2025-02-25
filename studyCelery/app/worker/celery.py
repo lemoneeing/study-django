@@ -32,7 +32,7 @@ app.conf.update(
 
 app.conf.broker_transport_options = {
     'priority_steps': list(range(10)),
-    'sep': ':',
+    # 'sep': ':',
     'queue_order_strategy': 'priority',
 }
 
