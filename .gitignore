@@ -163,3 +163,5 @@ cython_debug/
 /djangoByExample/mysite/mysite/my_settings.py
 /djangoByExample/mysite/mysite_data.json
 /djangoByExample/.python-version
+
+UML/

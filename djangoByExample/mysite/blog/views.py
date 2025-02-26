@@ -38,11 +38,33 @@ def post_list(request, tag_slug=None):
                   {'posts': posts,
                    'tags': tag})
 
+
 class PostList(ListView):
-    queryset = Post.published.all()
+    model = Post
     context_object_name = "posts"
     paginate_by = 3
     template_name = "blog/post/list.html"
+
+    def get_queryset(self):
+        query = None
+        if 'query' in self.request.GET:
+            form = SearchForm(self.request.GET)
+            if form.is_valid():
+                query = form.cleaned_data['query']
+
+            # 트라이그램 검색
+            return (Post.published
+                    .annotate(similarity=TrigramSimilarity('title', query), )
+                    .filter(similarity__gte=0.1)
+                    .order_by('-similarity'))
+        return Post.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = SearchForm(self.request.GET)
+        return context
+
+
 
 def post_detail(request, year, month, day, post):
     # try:
