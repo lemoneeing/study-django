@@ -49,7 +49,7 @@
             <h2>Search for posts</h2>
             <form method="get" action="{% url 'blog:post_search' %}">
                 <div class="search-container">
-                    {{ form.query }}
+                    <input type="text" name="query">
                     <input type="submit" value="Search">
                 </div>
             </form>

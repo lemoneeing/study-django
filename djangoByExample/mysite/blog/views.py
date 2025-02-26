@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 # from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.contrib.postgres.search import TrigramSimilarity
 # from django.http import Http404
@@ -15,30 +15,6 @@ from .forms import EmailForm, CommentForm, SearchForm
 
 
 # Create your views here.
-def post_list(request, tag_slug=None):
-    post_list = Post.published.all()
-
-    tag = None
-    if tag_slug:
-        tag = get_object_or_404(Tag, slug=tag_slug)
-        post_list = post_list.filter(tags__in=[tag])
-
-    paginator = Paginator(post_list, 3)
-    page_number = request.GET.get('page', 1)
-
-    try:
-        posts = paginator.page(page_number)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
-
-    return render(request,
-                  'blog/post/list.html',
-                  {'posts': posts,
-                   'tags': tag})
-
-
 class PostList(ListView):
     model = Post
     context_object_name = "posts"
@@ -46,17 +22,28 @@ class PostList(ListView):
     template_name = "blog/post/list.html"
 
     def get_queryset(self):
-        query = None
+        tag_slug = self.kwargs.get('tag_slug')
+
+        # GET /blog/search/?query=...
         if 'query' in self.request.GET:
             form = SearchForm(self.request.GET)
             if form.is_valid():
                 query = form.cleaned_data['query']
 
-            # 트라이그램 검색
-            return (Post.published
-                    .annotate(similarity=TrigramSimilarity('title', query), )
-                    .filter(similarity__gte=0.1)
-                    .order_by('-similarity'))
+                # 트라이그램 검색
+                return (Post.published
+                        .annotate(title_similarity=TrigramSimilarity('title', query),
+                                  body_similarity=TrigramSimilarity('body', query))
+                        .filter(Q(title_similarity__gte=0.2) | Q(body_similarity__gte=0.1))
+                        .order_by('-title_similarity', '-body_similarity'))
+
+        # Get /blog/<str:tag_slug>/
+        if tag_slug:
+            tag = get_object_or_404(Tag, slug=tag_slug)
+            posts = Post.published.filter(tags__in=[tag])
+
+            return posts
+
         return Post.objects.all()
 
     def get_context_data(self, **kwargs):
