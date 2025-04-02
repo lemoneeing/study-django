@@ -1,9 +1,9 @@
-from selenium import webdriver
 import unittest
+
+from selenium import webdriver
 
 
 class NewVisitorTest(unittest.TestCase):
-
     def setUp(self):
         self.browser = webdriver.Firefox()
 
@@ -12,12 +12,12 @@ class NewVisitorTest(unittest.TestCase):
 
     def test_can_start_list_and_retrieve_it_later(self):
         # 사용자는 새로나온 작업목록 관리 사이트에 방문한다.
-        self.browser.get('http://localhost:8080')
+        self.browser.get("http://localhost:8080")
         self.browser.implicitly_wait(3)
 
         # 웹 페이지 타이틀과 헤더에 'To-Do' 라고 표시된다.
-        self.assertIn('To-Do', self.browser.title)
-        self.fail('Finish the test!')
+        self.assertIn("To-Do", self.browser.title)
+        self.fail("Finish the test!")
 
         # 사용자는 작업 목록을 추가한다.
         # 텍스트상자에 '공작 깃털 사기'를 입력한다.
@@ -38,5 +38,5 @@ class NewVisitorTest(unittest.TestCase):
         # 해당 URL 에 접속하면 사용자가 만든 작업 목록을 확인할 수 있다.
 
 
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
+if __name__ == "__main__":
+    unittest.main(warnings="ignore")
