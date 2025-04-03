@@ -11,6 +11,12 @@ class NewVisitorTest(unittest.TestCase):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(3)
 
+    def check_for_rows_in_list_table(self, row_txt):
+        # 다시 페이지가 갱신되고 화면에 두 개의 아이템이 표시된다.
+        table = self.browser.find_element(by=By.ID, value="id_list_table")
+        rows = table.find_elements(by=By.TAG_NAME, value="tr")
+        self.assertIn(row_txt, [row.text for row in rows])
+
     def tearDown(self):
         self.browser.quit()
 
@@ -36,9 +42,7 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
 
         # 작업목록에 '1: 공작 깃털 사기' 아이템이 추가된다.
-        table = self.browser.find_element(by=By.ID, value="id_list_table")
-        rows = table.find_elements(by=By.TAG_NAME, value="tr")
-        self.assertIn(f"1: {item1}", [row.text for row in rows])
+        self.check_for_rows_in_list_table(f"1: {item1}")
 
         # 추가 아이템을 입력할 수 있는 여분의 텍스트 상자가 있다.
         # 사용자는 한 번 더 아이템을 입력한다: '공작 깃털로 그물만들기'
@@ -50,10 +54,8 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
 
         # 다시 페이지가 갱신되고 화면에 두 개의 아이템이 표시된다.
-        table = self.browser.find_element(by=By.ID, value="id_list_table")
-        rows = table.find_elements(by=By.TAG_NAME, value="tr")
-        self.assertIn(f"1: {item1}", [row.text for row in rows])
-        self.assertIn(f"2: {item2}", [row.text for row in rows])
+        self.check_for_rows_in_list_table(f"1: {item1}")
+        self.check_for_rows_in_list_table(f"2: {item2}")
 
         # 사용자는 추가한 작업 목록이 웹 서버에 저장되어 있는지 확인하고 싶다.
         # 사이트는 사용자를 위한 특정 URL 을 제공한다.

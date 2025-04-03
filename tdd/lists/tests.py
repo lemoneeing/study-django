@@ -2,6 +2,7 @@ from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import resolve
 
+from .models import Item
 from .views import home_page
 
 
@@ -31,3 +32,20 @@ class HomePageTest(TestCase):
         # expected_html = render_to_string("home.html", {"new_item_text": item_text})
         # self.assertEqual(response.content.decode(), expected_html)
         self.assertTemplateUsed(response, "home.html")
+
+
+class ItemTest(TestCase):
+    def test_saving_and_retrieving_items(self):
+        item1 = Item()
+        item1.text = "첫 번째 아이템"
+        item1.save()
+
+        item2 = Item()
+        item2.text = "두 번째 아이템"
+        item2.save()
+
+        saved_items = Item.objects.all()
+        self.assertEqual(saved_items.count(), 2)
+
+        self.assertEqual(saved_items[0].text, item1.text)
+        self.assertEqual(saved_items[1].text, item2.text)
