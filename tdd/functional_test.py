@@ -1,3 +1,4 @@
+import time
 import unittest
 
 from selenium import webdriver
@@ -27,29 +28,37 @@ class NewVisitorTest(unittest.TestCase):
         self.assertEqual(input_box.get_attribute("placeholder"), "작업 아이템 입력")
 
         # 텍스트상자에 '공작 깃털 사기'를 입력한다.
-        item = "공작 깃털 사기"
-        input_box.send_keys(item)
+        item1 = "공작 깃털 사기"
+        input_box.send_keys(item1)
 
         # Enter 키를 누르면 페이지가 갱신되고
-        # 작업목록에 '1: 공작 깃털 사기' 아이템이 추가된다.
         input_box.send_keys(Keys.ENTER)
+        time.sleep(1)
 
+        # 작업목록에 '1: 공작 깃털 사기' 아이템이 추가된다.
         table = self.browser.find_element(by=By.ID, value="id_list_table")
         rows = table.find_elements(by=By.TAG_NAME, value="tr")
-        self.assertTrue(
-            any(row.text == f"1: {item}" for row in rows),
-            "신규 작업이 테이블에 표시되지 않음.",
-        )
+        self.assertIn(f"1: {item1}", [row.text for row in rows])
 
         # 추가 아이템을 입력할 수 있는 여분의 텍스트 상자가 있다.
         # 사용자는 한 번 더 아이템을 입력한다: '공작 깃털로 그물만들기'
-        self.fail("Finish the test!")
+        item2 = "공작 깃털로 그물만들기"
+        input_box = self.browser.find_element(by=By.ID, value="id_new_item")
+        input_box.send_keys(item2)
+
+        input_box.send_keys(Keys.ENTER)
+        time.sleep(1)
 
         # 다시 페이지가 갱신되고 화면에 두 개의 아이템이 표시된다.
+        table = self.browser.find_element(by=By.ID, value="id_list_table")
+        rows = table.find_elements(by=By.TAG_NAME, value="tr")
+        self.assertIn(f"1: {item1}", [row.text for row in rows])
+        self.assertIn(f"2: {item2}", [row.text for row in rows])
 
         # 사용자는 추가한 작업 목록이 웹 서버에 저장되어 있는지 확인하고 싶다.
         # 사이트는 사용자를 위한 특정 URL 을 제공한다.
         # URL에 대한 설명도 함께 제공한다.
+        self.fail("Finish the test!")
 
         # 해당 URL 에 접속하면 사용자가 만든 작업 목록을 확인할 수 있다.
 
