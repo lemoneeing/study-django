@@ -1,12 +1,12 @@
 import time
-import unittest
 
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(3)
@@ -22,7 +22,7 @@ class NewVisitorTest(unittest.TestCase):
 
     def test_can_start_list_and_retrieve_it_later(self):
         # 사용자는 새로나온 작업목록 관리 사이트에 방문한다.
-        self.browser.get("http://localhost:8080")
+        self.browser.get(self.live_server_url)
 
         # 웹 페이지 타이틀과 헤더에 'To-Do' 라고 표시된다.
         self.assertIn("To-Do", self.browser.title)
@@ -63,7 +63,3 @@ class NewVisitorTest(unittest.TestCase):
         self.fail("Finish the test!")
 
         # 해당 URL 에 접속하면 사용자가 만든 작업 목록을 확인할 수 있다.
-
-
-if __name__ == "__main__":
-    unittest.main(warnings="ignore")
