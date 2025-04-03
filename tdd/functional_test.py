@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 class NewVisitorTest(unittest.TestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3)
 
     def tearDown(self):
         self.browser.quit()
@@ -15,7 +16,6 @@ class NewVisitorTest(unittest.TestCase):
     def test_can_start_list_and_retrieve_it_later(self):
         # 사용자는 새로나온 작업목록 관리 사이트에 방문한다.
         self.browser.get("http://localhost:8080")
-        self.browser.implicitly_wait(3)
 
         # 웹 페이지 타이틀과 헤더에 'To-Do' 라고 표시된다.
         self.assertIn("To-Do", self.browser.title)
@@ -23,18 +23,22 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn("To-Do", header.text)
 
         # 사용자는 작업 목록을 추가한다.
+        input_box = self.browser.find_element(by=By.ID, value="id_new_item")
+        self.assertEqual(input_box.get_attribute("placeholder"), "작업 아이템 입력")
+
         # 텍스트상자에 '공작 깃털 사기'를 입력한다.
-        input_box = self.browser.find_element(by=By.ID, value="input_new_item")
         item = "공작 깃털 사기"
         input_box.send_keys(item)
 
         # Enter 키를 누르면 페이지가 갱신되고
-        # 작업목록에 '1. 공작 깃털 사기' 아이템이 추가된다.
+        # 작업목록에 '1: 공작 깃털 사기' 아이템이 추가된다.
         input_box.send_keys(Keys.ENTER)
-        table = self.browser.find_element(by=By.ID, value="item_list_table")
+
+        table = self.browser.find_element(by=By.ID, value="id_list_table")
         rows = table.find_elements(by=By.TAG_NAME, value="tr")
         self.assertTrue(
-            any(row.text == f"1. {item}" for row in rows),
+            any(row.text == f"1: {item}" for row in rows),
+            "신규 작업이 테이블에 표시되지 않음.",
         )
 
         # 추가 아이템을 입력할 수 있는 여분의 텍스트 상자가 있다.
