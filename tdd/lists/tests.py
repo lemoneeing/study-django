@@ -11,7 +11,7 @@ class HomePageTest(TestCase):
         found = resolve("/")
         self.assertEqual(found.func, home_page)
 
-    def test_home_page_used_correct_html(self):
+    def test_home_page_uses_correct_html(self):
         response = self.client.get("/")
         self.assertTemplateUsed(response, "home.html")
 
@@ -34,19 +34,7 @@ class HomePageTest(TestCase):
 
         response = self.client.post("/", request.POST)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["location"], "/")
-
-    def test_home_page_displays_all_items(self):
-        item1_text = "itemy 1"
-        item2_text = "itemy 2"
-        Item.objects.create(text=item1_text)
-        Item.objects.create(text=item2_text)
-
-        request = HttpRequest()
-        response = home_page(request)
-
-        self.assertIn(item1_text, response.content.decode())
-        self.assertIn(item2_text, response.content.decode())
+        self.assertEqual(response["location"], "/lists/only-one-list/")
 
 
 class ItemTest(TestCase):
@@ -70,3 +58,20 @@ class ItemTest(TestCase):
         home_page(request)
 
         self.assertEqual(Item.objects.count(), 0)
+
+
+class LiveTest(TestCase):
+    def test_uses_list_template(self):
+        response = self.client.get("/lists/only-one-list/")
+        self.assertTemplateUsed(response, "list.html")
+
+    def test_displays_all_items(self):
+        item1_text = "itemy 1"
+        item2_text = "itemy 2"
+        Item.objects.create(text=item1_text)
+        Item.objects.create(text=item2_text)
+
+        response = self.client.get("/lists/only-one-list/")
+
+        self.assertContains(response, item1_text)
+        self.assertContains(response, item2_text)
