@@ -11,11 +11,7 @@ class HomePageTest(TestCase):
         found = resolve("/")
         self.assertEqual(found.func, home_page)
 
-    def test_home_page_returns_correct_html(self):
-        # request = HttpRequest()
-        # response = home_page(request)
-        # expected_html = render_to_string("home.html")
-        # self.assertEqual(response.content.decode(), expected_html)
+    def test_home_page_used_correct_html(self):
         response = self.client.get("/")
         self.assertTemplateUsed(response, "home.html")
 
@@ -25,13 +21,32 @@ class HomePageTest(TestCase):
         item_text = "신규 작업 아이템"
         request.POST["item_text"] = item_text
 
-        # response = home_page(request)
-        response = self.client.post("/", request.POST)
+        self.client.post("/", request.POST)
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertIn(new_item.text, item_text)
 
-        self.assertIn(item_text, response.content.decode())
-        # expected_html = render_to_string("home.html", {"new_item_text": item_text})
-        # self.assertEqual(response.content.decode(), expected_html)
-        self.assertTemplateUsed(response, "home.html")
+    def test_home_page_redirects_after_POST(self):
+        request = HttpRequest()
+        request.method = "POST"
+        item_text = "신규 작업 아이템"
+        request.POST["item_text"] = item_text
+
+        response = self.client.post("/", request.POST)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["location"], "/")
+
+    def test_home_page_displays_all_items(self):
+        item1_text = "itemy 1"
+        item2_text = "itemy 2"
+        Item.objects.create(text=item1_text)
+        Item.objects.create(text=item2_text)
+
+        request = HttpRequest()
+        response = home_page(request)
+
+        self.assertIn(item1_text, response.content.decode())
+        self.assertIn(item2_text, response.content.decode())
 
 
 class ItemTest(TestCase):
@@ -49,3 +64,9 @@ class ItemTest(TestCase):
 
         self.assertEqual(saved_items[0].text, item1.text)
         self.assertEqual(saved_items[1].text, item2.text)
+
+    def test_home_page_only_save_when_necessary(self):
+        request = HttpRequest()
+        home_page(request)
+
+        self.assertEqual(Item.objects.count(), 0)
