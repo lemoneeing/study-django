@@ -43,22 +43,24 @@ class ListAndItemTest(TestCase):
 
 class LiveTest(TestCase):
     def test_uses_list_template(self):
-        response = self.client.get("/lists/only-one-list/")
+        list_ = List.objects.create()
+        response = self.client.get(f"/lists/{list_.id}/")
         self.assertTemplateUsed(response, "list.html")
 
-    def test_displays_all_items(self):
-        list_ = List()
-        list_.save()
+    def test_displays_only_items_for_that_list(self):
+        correct_list_ = List.objects.create()
+        item1 = Item.objects.create(text="itemy 1", list=correct_list_)
+        item2 = Item.objects.create(text="itemy 2", list=correct_list_)
+        other_list_ = List.objects.create()
+        other_item1 = Item.objects.create(text="other itemy 1", list=other_list_)
+        other_item2 = Item.objects.create(text="other itemy 2", list=other_list_)
 
-        item1_text = "itemy 1"
-        item2_text = "itemy 2"
-        Item.objects.create(text=item1_text, list=list_)
-        Item.objects.create(text=item2_text, list=list_)
+        response = self.client.get(f"/lists/{correct_list_.id}/")
 
-        response = self.client.get("/lists/only-one-list/")
-
-        self.assertContains(response, item1_text)
-        self.assertContains(response, item2_text)
+        self.assertContains(response, item1.text)
+        self.assertContains(response, item2.text)
+        self.assertNotContains(response, other_item1.text)
+        self.assertNotContains(response, other_item2.text)
 
 
 class NewListTest(TestCase):
@@ -70,9 +72,42 @@ class NewListTest(TestCase):
         new_item = Item.objects.first()
         self.assertIn(new_item.text, item_text)
 
-    def test_home_page_redirects_after_POST(self):
+    def test_redirects_after_POST(self):
         item_text = "신규 작업 아이템"
-        response = self.client.post("/lists/new", {"item_text": item_text})
+        response = self.client.post("/lists/new", data={"item_text": item_text})
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["location"], "/lists/only-one-list/")
+        new_list = List.objects.first()
+        self.assertRedirects(response, f"/lists/{new_list.id}/")
+
+
+class NewItemTest(TestCase):
+    def test_can_save_a_POST_request_to_an_existing_list(self):
+        other_list = List.objects.create()  # noqa
+        correct_list = List.objects.create()
+
+        new_item_txt = "기존 목록에 신규 아이템"
+        self.client.post(
+            f"/lists/{correct_list.id}/add_item", data={"item_text": new_item_txt}
+        )
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item_txt, new_item.text)
+        self.assertEqual(new_item.list, correct_list)
+
+    def test_redirects_to_list_view(self):
+        correct_list = List.objects.create()
+        new_item_txt = "기존 목록에 신규 아이템"
+        response = self.client.post(
+            f"/lists/{correct_list.id}/add_item", data={"item_text": new_item_txt}
+        )
+
+        self.assertRedirects(response, f"/lists/{correct_list.id}/")
+
+    def test_passes_correct_list_to_template(self):
+        other_list = List.objects.create()  # noqa
+        correct_list = List.objects.create()
+
+        response = self.client.post(f"/lists/{correct_list.id}/")
+
+        self.assertEqual(response.context["list"], correct_list)

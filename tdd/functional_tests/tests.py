@@ -41,8 +41,14 @@ class NewVisitorTest(LiveServerTestCase):
         input_box.send_keys(Keys.ENTER)
         time.sleep(1)
 
+        # 사용자는 추가한 작업 목록이 웹 서버에 저장되어 있는지 확인하고 싶다.
+        # 사이트는 사용자를 위한 특정 URL 을 제공한다.
         edith_list_url = self.browser.current_url
         self.assertRegex(edith_list_url, "/lists/.+")
+
+        # URL에 대한 설명도 함께 제공한다.
+        # 해당 URL 에 접속하면 사용자가 만든 작업 목록을 확인할 수 있다.
+        ## TO-DO
 
         # 작업목록에 '1: 공작 깃털 사기' 아이템이 추가된다.
         self.check_for_rows_in_list_table(f"1: {ed_item1}")
@@ -89,10 +95,3 @@ class NewVisitorTest(LiveServerTestCase):
         page_text = self.browser.find_element(by=By.TAG_NAME, value="body").text
         self.assertNotIn(ed_item1, page_text)
         self.assertNotIn(ed_item2, page_text)
-
-        # 사용자는 추가한 작업 목록이 웹 서버에 저장되어 있는지 확인하고 싶다.
-        # 사이트는 사용자를 위한 특정 URL 을 제공한다.
-        # URL에 대한 설명도 함께 제공한다.
-        self.fail("Finish the test!")
-
-        # 해당 URL 에 접속하면 사용자가 만든 작업 목록을 확인할 수 있다.
