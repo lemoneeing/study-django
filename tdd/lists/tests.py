@@ -108,6 +108,8 @@ class NewItemTest(TestCase):
         other_list = List.objects.create()  # noqa
         correct_list = List.objects.create()
 
-        response = self.client.post(f"/lists/{correct_list.id}/")
+        response = self.client.post(
+            f"/lists/{correct_list.id}/",
+        )
 
         self.assertEqual(response.context["list"], correct_list)

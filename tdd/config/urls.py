@@ -17,14 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
+from django.urls.conf import include
 
-from lists import views
+from lists import views as list_views
 
 urlpatterns = [
-    path("", views.home_page, name="home"),
-    # To-Do: 비슷한 URL 이 3번 사용됨. -> 리펙터링
-    path("lists/new", views.new_list, name="new_list"),
-    path("lists/<int:list_id>/", views.view_list, name="view_list"),
-    path("lists/<int:list_id>/add_item", views.add_item, name="add_item"),
+    path("", list_views.home_page, name="home"),
+    path("lists/", include("lists.urls")),
     path("admin/", admin.site.urls),
 ]
