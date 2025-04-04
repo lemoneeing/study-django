@@ -1,4 +1,3 @@
-from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import resolve
 
@@ -14,27 +13,6 @@ class HomePageTest(TestCase):
     def test_home_page_uses_correct_html(self):
         response = self.client.get("/")
         self.assertTemplateUsed(response, "home.html")
-
-    def test_home_page_can_save_a_POST_request(self):
-        request = HttpRequest()
-        request.method = "POST"
-        item_text = "신규 작업 아이템"
-        request.POST["item_text"] = item_text
-
-        self.client.post("/", request.POST)
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertIn(new_item.text, item_text)
-
-    def test_home_page_redirects_after_POST(self):
-        request = HttpRequest()
-        request.method = "POST"
-        item_text = "신규 작업 아이템"
-        request.POST["item_text"] = item_text
-
-        response = self.client.post("/", request.POST)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["location"], "/lists/only-one-list/")
 
 
 class ItemTest(TestCase):
@@ -53,12 +31,6 @@ class ItemTest(TestCase):
         self.assertEqual(saved_items[0].text, item1.text)
         self.assertEqual(saved_items[1].text, item2.text)
 
-    def test_home_page_only_save_when_necessary(self):
-        request = HttpRequest()
-        home_page(request)
-
-        self.assertEqual(Item.objects.count(), 0)
-
 
 class LiveTest(TestCase):
     def test_uses_list_template(self):
@@ -75,3 +47,20 @@ class LiveTest(TestCase):
 
         self.assertContains(response, item1_text)
         self.assertContains(response, item2_text)
+
+
+class NewListTest(TestCase):
+    def test_home_page_can_save_a_POST_request(self):
+        item_text = "신규 작업 아이템"
+        self.client.post("/lists/new", {"item_text": item_text})
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertIn(new_item.text, item_text)
+
+    def test_home_page_redirects_after_POST(self):
+        item_text = "신규 작업 아이템"
+        response = self.client.post("/lists/new", {"item_text": item_text})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["location"], "/lists/only-one-list/")
