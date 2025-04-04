@@ -2,8 +2,11 @@ import time
 
 from django.test import LiveServerTestCase
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+MAX_WAIT = 5
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -11,11 +14,20 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(3)
 
-    def check_for_rows_in_list_table(self, row_txt):
-        # 다시 페이지가 갱신되고 화면에 두 개의 아이템이 표시된다.
-        table = self.browser.find_element(by=By.ID, value="id_list_table")
-        rows = table.find_elements(by=By.TAG_NAME, value="tr")
-        self.assertIn(row_txt, [row.text for row in rows])
+    def wait_for_rows_in_list_table(self, row_txt):
+        start_time = time.time()
+        while True:
+            try:
+                # 다시 페이지가 갱신되고 화면에 두 개의 아이템이 표시된다.
+                table = self.browser.find_element(by=By.ID, value="id_list_table")
+                rows = table.find_elements(by=By.TAG_NAME, value="tr")
+                self.assertIn(row_txt, [row.text for row in rows])
+                return
+
+            except (AssertionError, WebDriverException):
+                if time.time() - start_time > MAX_WAIT:
+                    raise
+                time.sleep(0.5)
 
     def tearDown(self):
         self.browser.quit()
@@ -51,7 +63,7 @@ class NewVisitorTest(LiveServerTestCase):
         ## TO-DO
 
         # 작업목록에 '1: 공작 깃털 사기' 아이템이 추가된다.
-        self.check_for_rows_in_list_table(f"1: {ed_item1}")
+        self.wait_for_rows_in_list_table(f"1: {ed_item1}")
 
         # 추가 아이템을 입력할 수 있는 여분의 텍스트 상자가 있다.
         # 사용자는 한 번 더 아이템을 입력한다: '공작 깃털로 그물만들기'
@@ -63,8 +75,8 @@ class NewVisitorTest(LiveServerTestCase):
         time.sleep(1)
 
         # 다시 페이지가 갱신되고 화면에 두 개의 아이템이 표시된다.
-        self.check_for_rows_in_list_table(f"1: {ed_item1}")
-        self.check_for_rows_in_list_table(f"2: {ed_item2}")
+        self.wait_for_rows_in_list_table(f"1: {ed_item1}")
+        self.wait_for_rows_in_list_table(f"2: {ed_item2}")
 
         # 다른 사용자(Francis) 가 접속한다.
 
