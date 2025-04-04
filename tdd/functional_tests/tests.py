@@ -107,3 +107,25 @@ class NewVisitorTest(LiveServerTestCase):
         page_text = self.browser.find_element(by=By.TAG_NAME, value="body").text
         self.assertNotIn(ed_item1, page_text)
         self.assertNotIn(ed_item2, page_text)
+
+    def test_layout_and_styling(self):
+        # 사용자 Edith 는 메인 페이지를 방문한다.
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+
+        # 입력상자가 화면의 중앙에 배치된 것을 본다.
+        input_box = self.browser.find_element(by=By.ID, value="id_new_item")
+        self.assertAlmostEqual(
+            input_box.location["x"] + input_box.size["width"] / 2, 512, delta=10
+        )
+
+        # 사용자는 새로운 리스트를 시작하고
+        # 입력상자가 가운데 배치된 것을 확인한다.
+        input_box.send_keys("testing")
+        input_box.send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        input_box = self.browser.find_element(by=By.ID, value="id_new_item")
+        self.assertAlmostEqual(
+            input_box.location["x"] + input_box.size["width"] / 2, 512, delta=10
+        )
